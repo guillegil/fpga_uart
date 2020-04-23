@@ -1,0 +1,104 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity uart_rx is
+  port (
+    CLK         : in std_logic;
+    SRST        : in std_logic;
+    TICK        : in std_logic;
+    RX          : in std_logic;
+    DATA_OUT    : out std_logic_vector(7 downto 0);
+    DATA_REC    : out std_logic
+  ) ;
+end uart_rx;
+
+architecture rtl of uart_rx is
+    
+    type states is (IDLE, START_BIT, DATA, STOP_BIT);
+    signal current_state, next_state : states := IDLE;
+
+    signal tick_count, tick_count_next : unsigned(3 downto 0) := (others => '0');
+    signal data_count, data_count_next : unsigned(3 downto 0) := (others => '0');
+    signal data_buffer, data_buffer_next : std_logic_vector(7 downto 0) := (others => '0');
+
+begin
+
+state_register : 
+    process 
+    begin
+        wait until rising_edge(CLK);
+        if SRST = '1' then
+            current_state <= IDLE;
+        else
+            current_state <= next_state;
+
+            tick_count <= tick_count_next;
+            data_count <= data_count_next;
+            data_buffer <= data_buffer_next;
+        end if;
+    end process ; -- state_register
+
+next_state_logic :
+    process(current_state, RX, TICK)
+    begin
+        next_state <= current_state;
+        tick_count_next <= tick_count;
+        data_count_next <= data_count;
+        data_buffer_next <= data_buffer;
+        DATA_REC <= '0';
+
+        case current_state is
+            when IDLE =>
+                tick_count_next <= (others => '0');
+                if RX = '0' then
+                    next_state <= START_BIT;
+                end if;
+            when START_BIT =>
+                data_count_next <= (others => '0');
+                if TICK = '1' then
+                    if tick_count = 7 then
+                        tick_count_next <= (others => '0');
+                        data_buffer_next <= (others => '0');
+                    else
+                        tick_count_next <= tick_count + 1;
+                    end if;
+                end if;
+            when DATA => 
+                if TICK = '1' then
+                    if tick_count = 15 then
+                        tick_count_next <= (others => '0');
+                        data_buffer_next <= RX & data_buffer(7 downto 1);
+
+                        if data_count = 7 then
+                            next_state <= STOP_BIT; 
+                        else
+                            data_count_next <= data_count + 1;
+                        end if;
+                    else
+                        tick_count_next <= tick_count + 1;
+                    end if;
+                end if;
+            when STOP_BIT =>
+                if TICK = '1' then
+                    if tick_count = 15 then
+                        tick_count_next <= (others => '0');
+                        if RX = '1' then
+                            DATA_REC <= '1';
+                        end if;
+                    else
+                        tick_count_next <= tick_count + 1;
+                    end if;
+                end if;
+            when others =>
+                next_state <= current_state;
+                tick_count_next <= tick_count;
+                data_count_next <= data_count;
+                data_buffer_next <= data_buffer;
+                DATA_REC <= '0';
+        end case;
+    end process;
+
+    DATA_OUT <= data_buffer;
+
+end rtl ; -- rtl
