@@ -6,7 +6,7 @@ use ieee.numeric_std.all;
 --     entity Work.br_gen
 --     generic map(
 --         BAUD_RATE     => BAUD_RATE,
---         CLOCK_FREQ_HZ => CLOCK_FREQ_HZ,
+--         CLOCK_FREQ_HZ => CLOCK_FREQ_HZ
 --     )
 --     port map(
 --         CLK  => CLK,  -- Input Clock signal at CLOCK_FREQ_HZ frequency

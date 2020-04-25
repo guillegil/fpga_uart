@@ -2,6 +2,18 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+-- UART_RX_Inst:
+--     entity Work.uart_rx
+--     port map(
+--         CLK  => CLK,    -- Clock port
+--         SRST => SRST,   -- Synchronous reset (active high)
+--         TICK => TICK,   -- Tick signal from baudrate generator
+--         RX   => RX,     -- UART RX port
+--         DATA_OUT => DATA_OUT,   -- Data received from rx line
+--         DATA_REC => DATA_REC    -- "Dara received" port (inform of a new data)
+--     );
+
+
 entity uart_rx is
   port (
     CLK         : in std_logic;
@@ -60,6 +72,7 @@ next_state_logic :
                     if tick_count = 7 then
                         tick_count_next <= (others => '0');
                         data_buffer_next <= (others => '0');
+                        next_state <= DATA;
                     else
                         tick_count_next <= tick_count + 1;
                     end if;
@@ -85,6 +98,7 @@ next_state_logic :
                         tick_count_next <= (others => '0');
                         if RX = '1' then
                             DATA_REC <= '1';
+                            next_state <= IDLE;
                         end if;
                     else
                         tick_count_next <= tick_count + 1;

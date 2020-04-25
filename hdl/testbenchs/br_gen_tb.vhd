@@ -10,9 +10,11 @@ end br_gen_tb;
 architecture testbench of br_gen_tb is
 
     constant T : time := 20 ns; -- Clock period
-    -- constant BIT_TICKS : real := (50000000.0 / 115200.0);
-    constant BIT_TIME  : time := 8.68 us;
 
+
+    constant BIT_TIME  : time := 8.68 us; -- Bit time for a baudrate of 115200
+
+    -- DUT Signals
     signal CLK, SRST, TICK_OUT : std_logic := '0';
 
     -- Test signals
