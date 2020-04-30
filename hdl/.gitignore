@@ -1,0 +1,9 @@
+*.bak
+*.mti
+*.mpf
+*.wlf
+*.cr.mti
+
+
+# Directories
+work
