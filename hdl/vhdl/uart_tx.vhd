@@ -63,7 +63,7 @@ begin
     end process;
 
     -- Next state logic
-    process(current_state, TICK, data_reg, tick_count, data_count)
+    process(current_state, TICK, EN, tick_count, data_count)
     begin
         next_state <= current_state;
         data_next <= data_reg;
@@ -115,6 +115,7 @@ begin
                 end if;
             end if;
         when others =>
+            DATA_SENT <= '0';
             next_state <= current_state;
             data_next <= data_reg;
             tick_count_next <= tick_count;
