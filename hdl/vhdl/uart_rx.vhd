@@ -34,6 +34,8 @@ architecture rtl of uart_rx is
     signal data_count, data_count_next : unsigned(3 downto 0) := (others => '0');
     signal data_buffer, data_buffer_next : std_logic_vector(7 downto 0) := (others => '0');
 
+    signal data_received : std_logic := '0';
+
 begin
 
 state_register : 
@@ -52,13 +54,13 @@ state_register :
     end process ; -- state_register
 
 next_state_logic :
-    process(current_state, RX, TICK)
+    process(current_state, tick_count, data_count, RX, TICK)
     begin
         next_state <= current_state;
         tick_count_next <= tick_count;
         data_count_next <= data_count;
         data_buffer_next <= data_buffer;
-        DATA_REC <= '0';
+        data_received <= '0';
 
         case current_state is
             when IDLE =>
@@ -96,9 +98,9 @@ next_state_logic :
                 if TICK = '1' then
                     if tick_count = 15 then
                         tick_count_next <= (others => '0');
+                        next_state <= IDLE;
                         if RX = '1' then
-                            DATA_REC <= '1';
-                            next_state <= IDLE;
+                            data_received <= '1';
                         end if;
                     else
                         tick_count_next <= tick_count + 1;
@@ -109,10 +111,11 @@ next_state_logic :
                 tick_count_next <= tick_count;
                 data_count_next <= data_count;
                 data_buffer_next <= data_buffer;
-                DATA_REC <= '0';
+                data_received <= '0';
         end case;
     end process;
 
     DATA_OUT <= data_buffer;
+    DATA_REC <= data_received;
 
 end rtl ; -- rtl

@@ -88,7 +88,7 @@ DUT: -- UART Receiver
             end loop;
 
             RX <= STOP_BIT;
-            wait for BIT_TIME;
+            wait until DATA_REC = '1';
 
             assert DATA_OUT = data
             report "Data received: " & integer'image(to_integer(unsigned(DATA_OUT))) & 
